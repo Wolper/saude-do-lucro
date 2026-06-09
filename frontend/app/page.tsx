@@ -30,6 +30,21 @@ export default function Home() {
             </article>
           ))}
         </div>
+
+        <div className="mt-10 flex flex-col gap-3 sm:flex-row">
+          <a
+            className="rounded-xl bg-emerald-400 px-5 py-3 text-center font-semibold text-slate-950"
+            href="/register"
+          >
+            Criar conta
+          </a>
+          <a
+            className="rounded-xl border border-white/10 px-5 py-3 text-center font-semibold text-white"
+            href="/login"
+          >
+            Entrar
+          </a>
+        </div>
       </section>
     </main>
   );

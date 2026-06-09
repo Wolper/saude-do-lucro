@@ -480,3 +480,27 @@ Não adicionar complexidade por antecipação.
 Não criar funcionalidades “porque todo sistema tem”.
 
 Só implementar o que ajuda diretamente na saúde financeira, lucratividade ou tomada de decisão.
+
+---
+
+## Autenticação e empresas — base SaaS
+
+A base SaaS inicial possui autenticação simples por JWT e cadastro obrigatório de uma empresa inicial para cada usuário criado.
+
+Regras desta fase:
+
+- Cada usuário é dono de uma única empresa.
+- `users.email` deve ser único.
+- Senhas devem ser armazenadas somente como hash.
+- Respostas da API nunca devem retornar `password_hash`.
+- Rotas protegidas devem exigir token Bearer válido.
+- Dados de negócio futuros devem carregar `company_id` para isolamento por empresa.
+
+Endpoints atuais:
+
+- `POST /auth/register`: cria usuário e empresa inicial.
+- `POST /auth/login`: autentica e retorna JWT.
+- `GET /auth/me`: retorna usuário autenticado.
+- `GET /companies/current`: retorna empresa do usuário autenticado.
+
+Migrations são controladas por Alembic em `backend/migrations` e devem ser executadas com `alembic upgrade head` a partir da pasta `backend`.
