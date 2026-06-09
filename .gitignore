@@ -1,0 +1,13 @@
+# Python
+__pycache__/
+.pytest_cache/
+.venv/
+
+# Node
+node_modules/
+npm-debug.log*
+
+# Build artifacts
+.next/
+dist/
+build/
