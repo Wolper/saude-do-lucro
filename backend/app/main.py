@@ -1,12 +1,9 @@
 from fastapi import FastAPI
 
-app = FastAPI(title="Saúde do Lucro API", version="0.1.0")
+from app.api.routes import auth, companies, health
+from app.core.config import settings
 
-
-@app.get("/health")
-def health() -> dict[str, str]:
-    return {
-        "status": "ok",
-        "service": "saude-do-lucro-api",
-        "version": "0.1.0",
-    }
+app = FastAPI(title=settings.app_name, version=settings.app_version)
+app.include_router(health.router)
+app.include_router(auth.router)
+app.include_router(companies.router)
