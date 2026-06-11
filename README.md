@@ -12,7 +12,11 @@ Fundação do projeto **Saúde do Lucro**, um copiloto de lucratividade para peq
 
 ```text
 backend/
+  app/core/config.py
+  app/core/database.py
   app/main.py
+  app/models/
+  migrations/
   requirements.txt
   tests/test_health.py
 frontend/
@@ -34,6 +38,19 @@ docker-compose.yml
 
 ```bash
 docker compose up -d postgres
+```
+
+Configure a URL de conexão usada pelo backend e pelo Alembic:
+
+```bash
+export DATABASE_URL="postgresql+psycopg://saude_user:saude_password@localhost:5432/saude_do_lucro"
+```
+
+Para aplicar as migrations:
+
+```bash
+cd backend
+alembic upgrade head
 ```
 
 ### Backend
@@ -78,7 +95,7 @@ A página inicial fica disponível em `http://localhost:3000`.
 
 ```bash
 cd backend
-pytest
+PYTHONPATH=. python -m pytest
 ```
 
 ### Frontend
