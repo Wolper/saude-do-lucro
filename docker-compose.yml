@@ -4,14 +4,14 @@ services:
     container_name: saude-do-lucro-postgres
     environment:
       POSTGRES_DB: saude_do_lucro
-      POSTGRES_USER: saude_do_lucro
-      POSTGRES_PASSWORD: saude_do_lucro
+      POSTGRES_USER: saude_user
+      POSTGRES_PASSWORD: saude_password
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U saude_do_lucro -d saude_do_lucro"]
+      test: ["CMD-SHELL", "pg_isready -U saude_user -d saude_do_lucro"]
       interval: 10s
       timeout: 5s
       retries: 5
