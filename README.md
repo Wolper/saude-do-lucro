@@ -92,8 +92,6 @@ Resposta esperada:
 
 ## API de autenticação
 
-Nesta etapa foram implementados apenas endpoints backend. O frontend de cadastro/login ainda não foi implementado.
-
 Endpoints disponíveis:
 
 - `POST /auth/register`: cria um usuário com senha hasheada e uma empresa inicial vinculada.
@@ -129,6 +127,20 @@ Use o `access_token` retornado no header `Authorization: Bearer <token>` para co
 
 ### Frontend
 
+Configure a URL pública da API usada pelo Next.js:
+
+```bash
+export NEXT_PUBLIC_API_URL="http://localhost:8000"
+```
+
+Também é possível usar o valor de referência do `.env.example`:
+
+```env
+NEXT_PUBLIC_API_URL=http://localhost:8000
+```
+
+Para rodar a aplicação:
+
 ```bash
 cd frontend
 npm install
@@ -136,6 +148,14 @@ npm run dev
 ```
 
 A página inicial fica disponível em `http://localhost:3000`.
+
+Fluxo manual de autenticação:
+
+1. Acesse `http://localhost:3000/register`, preencha os dados do usuário e da empresa e confirme o redirecionamento para `/app`.
+2. Use o botão **Sair** para remover o token local.
+3. Acesse `http://localhost:3000/login`, entre com o e-mail e senha cadastrados e confirme o retorno para `/app`.
+
+A tela `/app` mostra apenas a base da conta criada. Dashboard financeiro, lançamentos, produtos, gráficos e IA ainda não foram implementados.
 
 ## Testes
 
