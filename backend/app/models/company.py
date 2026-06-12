@@ -1,10 +1,14 @@
 from datetime import datetime
+from typing import TYPE_CHECKING
 
 from sqlalchemy import DateTime, ForeignKey, String, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.database import Base
 from app.models.user import User
+
+if TYPE_CHECKING:
+    from app.models.financial_entry import FinancialEntry
 
 
 class Company(Base):
@@ -23,3 +27,6 @@ class Company(Base):
     )
 
     owner: Mapped[User] = relationship(back_populates="company")
+    financial_entries: Mapped[list["FinancialEntry"]] = relationship(
+        back_populates="company", cascade="all, delete-orphan"
+    )

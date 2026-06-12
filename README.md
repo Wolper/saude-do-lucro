@@ -125,6 +125,42 @@ curl -X POST http://localhost:8000/auth/login \
 
 Use o `access_token` retornado no header `Authorization: Bearer <token>` para consultar `/auth/me` e `/companies/current`.
 
+
+## API de lançamentos financeiros
+
+Endpoints protegidos por `Authorization: Bearer <token>`:
+
+- `POST /financial-entries`: cria um lançamento financeiro para a empresa do usuário autenticado.
+- `GET /financial-entries`: lista lançamentos somente da empresa autenticada.
+- `GET /financial-entries/{entry_id}`: consulta um lançamento da empresa autenticada.
+- `PUT /financial-entries/{entry_id}`: atualiza um lançamento da empresa autenticada.
+- `DELETE /financial-entries/{entry_id}`: remove um lançamento da empresa autenticada.
+
+Exemplo de criação:
+
+```bash
+curl -X POST http://localhost:8000/financial-entries \
+  -H "Authorization: Bearer <token>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "type": "revenue",
+    "category": "balcão",
+    "description": "Vendas do dia",
+    "amount": 850.50,
+    "payment_method": "pix",
+    "entry_date": "2026-06-09",
+    "source": "manual"
+  }'
+```
+
+Filtros simples de listagem:
+
+- `type`: `revenue` ou `expense`;
+- `start_date`: data inicial no formato `YYYY-MM-DD`;
+- `end_date`: data final no formato `YYYY-MM-DD`.
+
+Dashboard, cálculos de lucro, ponto de equilíbrio, relatórios e gráficos ainda não foram implementados.
+
 ### Frontend
 
 Configure a URL pública da API usada pelo Next.js:
