@@ -10,6 +10,9 @@ DEFAULT_DATABASE_URL = (
 class Settings:
     def __init__(self) -> None:
         self.database_url = getenv("DATABASE_URL", DEFAULT_DATABASE_URL)
+        self.jwt_secret_key = getenv("JWT_SECRET_KEY", "change-me-in-development")
+        self.jwt_algorithm = getenv("JWT_ALGORITHM", "HS256")
+        self.access_token_expire_minutes = int(getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "1440"))
 
 
 @lru_cache
