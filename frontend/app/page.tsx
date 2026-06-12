@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 const pillars = [
   "Saúde financeira",
   "Ponto de equilíbrio",
@@ -19,6 +21,21 @@ export default function Home() {
           Uma fundação simples para ajudar restaurantes, trailers, hamburguerias
           e outros negócios de alimentação a entenderem se estão lucrando.
         </p>
+
+        <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+          <Link
+            className="rounded-2xl bg-emerald-400 px-6 py-3 text-center font-semibold text-slate-950 transition hover:bg-emerald-300"
+            href="/register"
+          >
+            Criar conta
+          </Link>
+          <Link
+            className="rounded-2xl border border-white/10 px-6 py-3 text-center font-semibold text-slate-100 transition hover:border-emerald-300 hover:text-emerald-200"
+            href="/login"
+          >
+            Entrar
+          </Link>
+        </div>
 
         <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {pillars.map((pillar) => (
