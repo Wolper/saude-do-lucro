@@ -200,6 +200,33 @@ curl -H "Authorization: Bearer <token>" "http://localhost:8000/business-costs?is
 
 Ponto de equilíbrio e necessidade mínima de faturamento ainda não foram implementados.
 
+## API de resumo de custos fixos
+
+Endpoint protegido por `Authorization: Bearer <token>`:
+
+- `GET /business-cost-summary`: resume os custos fixos mensais cadastrados para a empresa do usuário autenticado.
+
+Exemplo:
+
+```bash
+curl -H "Authorization: Bearer <token>" \
+  http://localhost:8000/business-cost-summary
+```
+
+Exemplo de resposta:
+
+```json
+{
+  "total_active_monthly_costs": 3700.0,
+  "active_costs_count": 4,
+  "inactive_costs_count": 1,
+  "total_costs_count": 5,
+  "status": "configured"
+}
+```
+
+Custos inativos não entram em `total_active_monthly_costs`. Ponto de equilíbrio ainda não foi implementado.
+
 ## API de resumo financeiro
 
 Endpoint protegido por `Authorization: Bearer <token>`:
