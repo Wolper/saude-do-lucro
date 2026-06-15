@@ -32,6 +32,28 @@ export type Company = {
   segment: string;
 };
 
+export type BusinessCost = {
+  id: number;
+  company_id: number;
+  name: string;
+  category: string;
+  amount: number;
+  is_active: boolean;
+  notes: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export type BusinessCostPayload = {
+  name: string;
+  category: string;
+  amount: number;
+  is_active: boolean;
+  notes?: string | null;
+};
+
+export type BusinessCostStatusFilter = "all" | "active" | "inactive";
+
 export type FinancialEntryType = "revenue" | "expense";
 
 export type FinancialEntry = {
@@ -145,6 +167,45 @@ export function getCurrentCompany(token: string) {
 
 export function getFinancialSummary(token: string) {
   return request<FinancialSummary>("/financial-summary", {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+}
+
+export function listBusinessCosts(token: string, filter: BusinessCostStatusFilter = "all") {
+  const params = filter === "all" ? "" : `?is_active=${filter === "active"}`;
+
+  return request<BusinessCost[]>(`/business-costs${params}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+}
+
+export function createBusinessCost(token: string, payload: BusinessCostPayload) {
+  return request<BusinessCost>("/business-costs", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(payload),
+  });
+}
+
+export function updateBusinessCost(token: string, costId: number, payload: BusinessCostPayload) {
+  return request<BusinessCost>(`/business-costs/${costId}`, {
+    method: "PUT",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(payload),
+  });
+}
+
+export function deleteBusinessCost(token: string, costId: number) {
+  return requestWithoutBody(`/business-costs/${costId}`, {
+    method: "DELETE",
     headers: {
       Authorization: `Bearer ${token}`,
     },

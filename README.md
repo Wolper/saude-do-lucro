@@ -301,3 +301,17 @@ npm run build
 ## Diretrizes do projeto
 
 As diretrizes longas de produto, arquitetura e escopo estão em [`docs/project-guidelines.md`](docs/project-guidelines.md).
+
+## Tela de custos fixos
+
+A área autenticada inclui a rota `/app/business-costs` para cadastrar e acompanhar custos fixos mensais do negócio.
+
+Fluxo manual sugerido:
+
+1. Entrar na aplicação e acessar `/app/business-costs` pelo botão “Cadastrar custos fixos” na área inicial.
+2. Criar um custo fixo informando nome, categoria, valor mensal, status ativo e observações opcionais.
+3. Conferir a listagem em cards e alternar os filtros Todos, Ativos e Inativos.
+4. Usar o botão Ativar/Desativar para mudar o status de um custo.
+5. Usar o botão Excluir e confirmar a remoção quando necessário.
+
+Ponto de equilíbrio ainda não foi implementado nesta tela.
