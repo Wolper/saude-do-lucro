@@ -191,7 +191,16 @@ Fluxo manual de autenticação:
 2. Use o botão **Sair** para remover o token local.
 3. Acesse `http://localhost:3000/login`, entre com o e-mail e senha cadastrados e confirme o retorno para `/app`.
 
-A tela `/app` mostra apenas a base da conta criada. Dashboard financeiro, lançamentos, produtos, gráficos e IA ainda não foram implementados.
+A tela `/app` mostra a base da conta criada e tem um link para `/app/entries`.
+
+Fluxo manual de lançamentos financeiros:
+
+1. Acesse `/app/entries` com uma sessão ativa.
+2. Cadastre uma receita ou despesa informando tipo, categoria, valor, forma de pagamento e data.
+3. Use o filtro **Todos**, **Receitas** ou **Despesas** para listar lançamentos por tipo.
+4. Use **Excluir** em um card para remover um lançamento.
+
+Dashboard financeiro, cálculos de lucro, ponto de equilíbrio, relatórios, gráficos e IA ainda não foram implementados.
 
 ## Testes
 
