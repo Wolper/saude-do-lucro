@@ -301,7 +301,7 @@ Exemplo de resposta:
 
 Dashboard, gráficos, margem por produto e IA ainda não foram implementados.
 
-A tela autenticada `/app` exibe um resumo financeiro simples consumindo `/financial-summary` e um resumo simples de custos fixos consumindo `/business-cost-summary`. Gráficos, margem por produto e IA ainda não foram implementados.
+A tela autenticada `/app` exibe um resumo financeiro simples consumindo `/financial-summary`, um resumo simples de custos fixos consumindo `/business-cost-summary` e um ponto de equilíbrio simplificado consumindo `/break-even-summary`. Esse cálculo ainda considera apenas custos fixos ativos e receitas registradas; gráficos, margem por produto, CMV, custos variáveis e IA ainda não foram implementados.
 
 ### Frontend
 

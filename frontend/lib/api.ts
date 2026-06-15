@@ -84,6 +84,11 @@ export type FinancialSummaryStatus = "positive" | "neutral" | "negative";
 
 export type BusinessCostSummaryStatus = "configured" | "empty";
 
+export type BreakEvenSummaryStatus =
+  | "not_configured"
+  | "below_break_even"
+  | "break_even_reached";
+
 export type BusinessCostSummary = {
   total_active_monthly_costs: number;
   active_costs_count: number;
@@ -100,6 +105,21 @@ export type FinancialSummary = {
   entries_count: number;
   start_date: string | null;
   end_date: string | null;
+};
+
+export type BreakEvenSummary = {
+  monthly_fixed_costs: number;
+  break_even_revenue: number;
+  period_revenue: number;
+  revenue_gap: number;
+  coverage_percent: number | null;
+  status: BreakEvenSummaryStatus;
+  active_costs_count: number;
+  revenue_entries_count: number;
+  start_date: string | null;
+  end_date: string | null;
+  method: string;
+  note: string;
 };
 
 export class ApiError extends Error {
@@ -185,6 +205,14 @@ export function getFinancialSummary(token: string) {
 
 export function getBusinessCostSummary(token: string) {
   return request<BusinessCostSummary>("/business-cost-summary", {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+}
+
+export function getBreakEvenSummary(token: string) {
+  return request<BreakEvenSummary>("/break-even-summary", {
     headers: {
       Authorization: `Bearer ${token}`,
     },
