@@ -198,8 +198,6 @@ curl -H "Authorization: Bearer <token>" "http://localhost:8000/business-costs?is
 curl -H "Authorization: Bearer <token>" "http://localhost:8000/business-costs?is_active=false"
 ```
 
-Ponto de equilíbrio e necessidade mínima de faturamento ainda não foram implementados.
-
 ## API de resumo de custos fixos
 
 Endpoint protegido por `Authorization: Bearer <token>`:
@@ -225,7 +223,46 @@ Exemplo de resposta:
 }
 ```
 
-Custos inativos não entram em `total_active_monthly_costs`. Ponto de equilíbrio ainda não foi implementado.
+Custos inativos não entram em `total_active_monthly_costs`.
+
+## API de ponto de equilíbrio simplificado
+
+Endpoint protegido por `Authorization: Bearer <token>`:
+
+- `GET /break-even-summary`: resume a cobertura dos custos fixos ativos pela receita da empresa autenticada.
+
+Parâmetros opcionais de query string:
+
+- `start_date`: data inicial no formato `YYYY-MM-DD`;
+- `end_date`: data final no formato `YYYY-MM-DD`.
+
+Exemplo:
+
+```bash
+curl -H "Authorization: Bearer <token>" \
+  "http://localhost:8000/break-even-summary?start_date=2026-06-01&end_date=2026-06-30"
+```
+
+Exemplo de resposta:
+
+```json
+{
+  "monthly_fixed_costs": 3700.0,
+  "break_even_revenue": 3700.0,
+  "period_revenue": 2500.0,
+  "revenue_gap": 1200.0,
+  "coverage_percent": 67.57,
+  "status": "below_break_even",
+  "active_costs_count": 4,
+  "revenue_entries_count": 12,
+  "start_date": "2026-06-01",
+  "end_date": "2026-06-30",
+  "method": "fixed_cost_coverage",
+  "note": "Cálculo simplificado: considera apenas custos fixos ativos e receitas do período. Não considera margem por produto, custos variáveis ou CMV."
+}
+```
+
+Este é um cálculo simplificado de cobertura de custos fixos: a receita necessária para cobrir custos fixos é igual à soma dos custos fixos ativos mensais. Margem por produto, CMV, custos variáveis e IA ainda não foram implementados.
 
 ## API de resumo financeiro
 
@@ -262,9 +299,9 @@ Exemplo de resposta:
 }
 ```
 
-Dashboard, ponto de equilíbrio, margem por produto e IA ainda não foram implementados.
+Dashboard, gráficos, margem por produto e IA ainda não foram implementados.
 
-A tela autenticada `/app` exibe um resumo financeiro simples consumindo `/financial-summary` e um resumo simples de custos fixos consumindo `/business-cost-summary`. Ponto de equilíbrio, gráficos, margem por produto e IA ainda não foram implementados.
+A tela autenticada `/app` exibe um resumo financeiro simples consumindo `/financial-summary` e um resumo simples de custos fixos consumindo `/business-cost-summary`. Gráficos, margem por produto e IA ainda não foram implementados.
 
 ### Frontend
 

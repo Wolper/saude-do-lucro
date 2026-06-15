@@ -2,6 +2,7 @@ from fastapi import FastAPI
 
 from app.api.routes import (
     auth,
+    break_even_summary,
     business_cost_summary,
     business_costs,
     companies,
@@ -11,6 +12,7 @@ from app.api.routes import (
 
 app = FastAPI(title="Saúde do Lucro API", version="0.1.0")
 app.include_router(auth.router)
+app.include_router(break_even_summary.router)
 app.include_router(companies.router)
 app.include_router(business_costs.router)
 app.include_router(business_cost_summary.router)
