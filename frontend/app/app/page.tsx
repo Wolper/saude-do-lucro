@@ -5,10 +5,12 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import {
+  BreakEvenSummary,
   BusinessCostSummary,
   Company,
   FinancialSummary,
   User,
+  getBreakEvenSummary,
   getBusinessCostSummary,
   getCurrentCompany,
   getCurrentUser,
@@ -38,6 +40,24 @@ const summaryStatusContent = {
   },
 } satisfies Record<FinancialSummary["status"], { text: string; className: string }>;
 
+const breakEvenStatusContent = {
+  not_configured: {
+    text: "Cadastre seus custos fixos para calcular este resumo.",
+    className: "border-sky-300/20 bg-sky-300/10 text-sky-100",
+  },
+  below_break_even: {
+    text: "Você ainda não cobriu seus custos fixos.",
+    className: "border-orange-300/20 bg-orange-300/10 text-orange-100",
+  },
+  break_even_reached: {
+    text: "Você já cobriu seus custos fixos.",
+    className: "border-emerald-300/20 bg-emerald-300/10 text-emerald-100",
+  },
+} satisfies Record<BreakEvenSummary["status"], { text: string; className: string }>;
+
+const fallbackBreakEvenNote =
+  "Este é um cálculo simplificado. Ele considera apenas custos fixos ativos e receitas registradas. Ainda não considera margem por produto, custos variáveis ou CMV.";
+
 const businessCostStatusText = {
   configured: "Seus custos fixos ativos já foram cadastrados.",
   empty: "Você ainda não cadastrou custos fixos ativos.",
@@ -47,14 +67,27 @@ function formatCurrency(value: number) {
   return currencyFormatter.format(value);
 }
 
+function formatPercent(value: number | null) {
+  if (value === null) {
+    return "Cobertura ainda não calculada.";
+  }
+
+  return `${new Intl.NumberFormat("pt-BR", {
+    maximumFractionDigits: 2,
+    minimumFractionDigits: 0,
+  }).format(value)}% dos custos fixos cobertos.`;
+}
+
 export default function AppPage() {
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
   const [company, setCompany] = useState<Company | null>(null);
   const [summary, setSummary] = useState<FinancialSummary | null>(null);
   const [businessCostSummary, setBusinessCostSummary] = useState<BusinessCostSummary | null>(null);
+  const [breakEvenSummary, setBreakEvenSummary] = useState<BreakEvenSummary | null>(null);
   const [error, setError] = useState("");
   const [businessCostError, setBusinessCostError] = useState("");
+  const [breakEvenError, setBreakEvenError] = useState("");
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -69,19 +102,26 @@ export default function AppPage() {
 
     async function loadInitialData() {
       try {
-        const [currentUser, currentCompany, currentSummary, currentBusinessCostSummary] =
-          await Promise.allSettled([
-            getCurrentUser(authToken),
-            getCurrentCompany(authToken),
-            getFinancialSummary(authToken),
-            getBusinessCostSummary(authToken),
-          ]);
+        const [
+          currentUser,
+          currentCompany,
+          currentSummary,
+          currentBusinessCostSummary,
+          currentBreakEvenSummary,
+        ] = await Promise.allSettled([
+          getCurrentUser(authToken),
+          getCurrentCompany(authToken),
+          getFinancialSummary(authToken),
+          getBusinessCostSummary(authToken),
+          getBreakEvenSummary(authToken),
+        ]);
 
         const expiredSession = [
           currentUser,
           currentCompany,
           currentSummary,
           currentBusinessCostSummary,
+          currentBreakEvenSummary,
         ].some((result) => result.status === "rejected" && isUnauthorizedError(result.reason));
 
         if (expiredSession) {
@@ -109,6 +149,12 @@ export default function AppPage() {
           setBusinessCostSummary(currentBusinessCostSummary.value);
         } else {
           setBusinessCostError("Não foi possível carregar seus custos fixos.");
+        }
+
+        if (currentBreakEvenSummary.status === "fulfilled") {
+          setBreakEvenSummary(currentBreakEvenSummary.value);
+        } else {
+          setBreakEvenError("Não foi possível carregar o ponto de equilíbrio.");
         }
       } finally {
         setIsLoading(false);
@@ -234,6 +280,73 @@ export default function AppPage() {
 
               <p className="mt-4 text-sm text-slate-300">
                 Lançamentos considerados: {summary.entries_count}
+              </p>
+            </div>
+          ) : null}
+        </section>
+
+
+        <section className="rounded-3xl border border-white/10 bg-white/[0.06] p-6">
+          <div>
+            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-emerald-300">
+              Ponto de equilíbrio simplificado
+            </p>
+            <h2 className="mt-2 text-2xl font-bold text-white">Receitas cobrindo custos fixos</h2>
+          </div>
+
+          {breakEvenError ? (
+            <p className="mt-6 rounded-2xl bg-red-500/10 px-4 py-3 text-sm text-red-200">
+              {breakEvenError}
+            </p>
+          ) : null}
+
+          {breakEvenSummary ? (
+            <div className="mt-6">
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="rounded-2xl bg-slate-950/60 p-4">
+                  <p className="text-sm text-slate-400">Custos fixos mensais</p>
+                  <p className="mt-2 text-2xl font-bold text-white">
+                    {formatCurrency(breakEvenSummary.monthly_fixed_costs)}
+                  </p>
+                </div>
+                <div className="rounded-2xl bg-slate-950/60 p-4">
+                  <p className="text-sm text-slate-400">Receita necessária</p>
+                  <p className="mt-2 text-2xl font-bold text-white">
+                    {formatCurrency(breakEvenSummary.break_even_revenue)}
+                  </p>
+                </div>
+                <div className="rounded-2xl bg-slate-950/60 p-4">
+                  <p className="text-sm text-slate-400">Receita registrada</p>
+                  <p className="mt-2 text-2xl font-bold text-emerald-200">
+                    {formatCurrency(breakEvenSummary.period_revenue)}
+                  </p>
+                </div>
+                <div className="rounded-2xl bg-slate-950/60 p-4">
+                  <p className="text-sm text-slate-400">Falta para cobrir</p>
+                  <p className="mt-2 text-2xl font-bold text-orange-100">
+                    {formatCurrency(breakEvenSummary.revenue_gap)}
+                  </p>
+                </div>
+                <div className="rounded-2xl bg-slate-950/60 p-4">
+                  <p className="text-sm text-slate-400">Cobertura</p>
+                  <p className="mt-2 text-lg font-semibold text-slate-100">
+                    {formatPercent(breakEvenSummary.coverage_percent)}
+                  </p>
+                </div>
+                <div
+                  className={`rounded-2xl border p-4 ${
+                    breakEvenStatusContent[breakEvenSummary.status].className
+                  }`}
+                >
+                  <p className="text-sm opacity-80">Situação</p>
+                  <p className="mt-2 text-lg font-semibold">
+                    {breakEvenStatusContent[breakEvenSummary.status].text}
+                  </p>
+                </div>
+              </div>
+
+              <p className="mt-4 rounded-2xl border border-white/10 bg-slate-950/40 p-4 text-sm leading-6 text-slate-300">
+                {breakEvenSummary.note || fallbackBreakEvenNote}
               </p>
             </div>
           ) : null}
