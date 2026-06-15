@@ -264,7 +264,7 @@ Exemplo de resposta:
 
 Dashboard, ponto de equilíbrio, margem por produto e IA ainda não foram implementados.
 
-A tela autenticada `/app` exibe um resumo financeiro simples consumindo `/financial-summary`. Dashboard avançado, gráficos, ponto de equilíbrio, margem por produto e IA ainda não foram implementados.
+A tela autenticada `/app` exibe um resumo financeiro simples consumindo `/financial-summary` e um resumo simples de custos fixos consumindo `/business-cost-summary`. Ponto de equilíbrio, gráficos, margem por produto e IA ainda não foram implementados.
 
 ### Frontend
 

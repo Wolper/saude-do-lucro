@@ -82,6 +82,16 @@ export type FinancialEntryPayload = {
 
 export type FinancialSummaryStatus = "positive" | "neutral" | "negative";
 
+export type BusinessCostSummaryStatus = "configured" | "empty";
+
+export type BusinessCostSummary = {
+  total_active_monthly_costs: number;
+  active_costs_count: number;
+  inactive_costs_count: number;
+  total_costs_count: number;
+  status: BusinessCostSummaryStatus;
+};
+
 export type FinancialSummary = {
   total_revenue: number;
   total_expense: number;
@@ -167,6 +177,14 @@ export function getCurrentCompany(token: string) {
 
 export function getFinancialSummary(token: string) {
   return request<FinancialSummary>("/financial-summary", {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+}
+
+export function getBusinessCostSummary(token: string) {
+  return request<BusinessCostSummary>("/business-cost-summary", {
     headers: {
       Authorization: `Bearer ${token}`,
     },

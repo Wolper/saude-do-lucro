@@ -5,9 +5,11 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import {
+  BusinessCostSummary,
   Company,
   FinancialSummary,
   User,
+  getBusinessCostSummary,
   getCurrentCompany,
   getCurrentUser,
   getFinancialSummary,
@@ -36,6 +38,11 @@ const summaryStatusContent = {
   },
 } satisfies Record<FinancialSummary["status"], { text: string; className: string }>;
 
+const businessCostStatusText = {
+  configured: "Seus custos fixos ativos já foram cadastrados.",
+  empty: "Você ainda não cadastrou custos fixos ativos.",
+} satisfies Record<BusinessCostSummary["status"], string>;
+
 function formatCurrency(value: number) {
   return currencyFormatter.format(value);
 }
@@ -45,7 +52,9 @@ export default function AppPage() {
   const [user, setUser] = useState<User | null>(null);
   const [company, setCompany] = useState<Company | null>(null);
   const [summary, setSummary] = useState<FinancialSummary | null>(null);
+  const [businessCostSummary, setBusinessCostSummary] = useState<BusinessCostSummary | null>(null);
   const [error, setError] = useState("");
+  const [businessCostError, setBusinessCostError] = useState("");
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -60,23 +69,47 @@ export default function AppPage() {
 
     async function loadInitialData() {
       try {
-        const [currentUser, currentCompany, currentSummary] = await Promise.all([
-          getCurrentUser(authToken),
-          getCurrentCompany(authToken),
-          getFinancialSummary(authToken),
-        ]);
-        setUser(currentUser);
-        setCompany(currentCompany);
-        setSummary(currentSummary);
-      } catch (caughtError) {
-        if (isUnauthorizedError(caughtError)) {
+        const [currentUser, currentCompany, currentSummary, currentBusinessCostSummary] =
+          await Promise.allSettled([
+            getCurrentUser(authToken),
+            getCurrentCompany(authToken),
+            getFinancialSummary(authToken),
+            getBusinessCostSummary(authToken),
+          ]);
+
+        const expiredSession = [
+          currentUser,
+          currentCompany,
+          currentSummary,
+          currentBusinessCostSummary,
+        ].some((result) => result.status === "rejected" && isUnauthorizedError(result.reason));
+
+        if (expiredSession) {
           removeToken();
           setError("Sua sessão expirou. Entre novamente.");
           router.replace("/login");
           return;
         }
 
-        setError("Não foi possível carregar seu resumo financeiro.");
+        if (currentUser.status === "fulfilled") {
+          setUser(currentUser.value);
+        }
+
+        if (currentCompany.status === "fulfilled") {
+          setCompany(currentCompany.value);
+        }
+
+        if (currentSummary.status === "fulfilled") {
+          setSummary(currentSummary.value);
+        } else {
+          setError("Não foi possível carregar seu resumo financeiro.");
+        }
+
+        if (currentBusinessCostSummary.status === "fulfilled") {
+          setBusinessCostSummary(currentBusinessCostSummary.value);
+        } else {
+          setBusinessCostError("Não foi possível carregar seus custos fixos.");
+        }
       } finally {
         setIsLoading(false);
       }
@@ -202,6 +235,73 @@ export default function AppPage() {
               <p className="mt-4 text-sm text-slate-300">
                 Lançamentos considerados: {summary.entries_count}
               </p>
+            </div>
+          ) : null}
+        </section>
+
+        <section className="rounded-3xl border border-white/10 bg-white/[0.06] p-6">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+              <p className="text-sm font-semibold uppercase tracking-[0.2em] text-emerald-300">
+                Custos fixos mensais
+              </p>
+              <h2 className="mt-2 text-2xl font-bold text-white">Base para entender seu negócio</h2>
+            </div>
+            <Link
+              className="inline-flex rounded-2xl border border-emerald-300/30 px-5 py-3 text-sm font-semibold text-emerald-100 transition hover:border-emerald-200 hover:bg-emerald-400/10"
+              href="/app/business-costs"
+            >
+              Cadastrar custos fixos
+            </Link>
+          </div>
+
+          {businessCostError ? (
+            <p className="mt-6 rounded-2xl bg-red-500/10 px-4 py-3 text-sm text-red-200">
+              {businessCostError}
+            </p>
+          ) : null}
+
+          {businessCostSummary ? (
+            <div className="mt-6">
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="rounded-2xl bg-slate-950/60 p-4 sm:col-span-2">
+                  <p className="text-sm text-slate-400">Total mensal ativo</p>
+                  <p className="mt-2 text-3xl font-bold text-emerald-200">
+                    {formatCurrency(businessCostSummary.total_active_monthly_costs)}
+                  </p>
+                </div>
+                <div className="rounded-2xl bg-slate-950/60 p-4">
+                  <p className="text-sm text-slate-400">Custos ativos</p>
+                  <p className="mt-2 text-2xl font-bold text-white">
+                    {businessCostSummary.active_costs_count}
+                  </p>
+                </div>
+                <div className="rounded-2xl bg-slate-950/60 p-4">
+                  <p className="text-sm text-slate-400">Custos inativos</p>
+                  <p className="mt-2 text-2xl font-bold text-white">
+                    {businessCostSummary.inactive_costs_count}
+                  </p>
+                </div>
+                <div className="rounded-2xl bg-slate-950/60 p-4">
+                  <p className="text-sm text-slate-400">Total cadastrado</p>
+                  <p className="mt-2 text-2xl font-bold text-white">
+                    {businessCostSummary.total_costs_count}
+                  </p>
+                </div>
+                <div className="rounded-2xl border border-sky-300/20 bg-sky-300/10 p-4 text-sky-100">
+                  <p className="text-sm opacity-80">Situação</p>
+                  <p className="mt-2 text-lg font-semibold">
+                    {businessCostStatusText[businessCostSummary.status]}
+                  </p>
+                </div>
+              </div>
+
+              {businessCostSummary.status === "empty" ? (
+                <p className="mt-4 rounded-2xl border border-emerald-300/20 bg-emerald-300/10 p-4 text-sm leading-6 text-emerald-100">
+                  Cadastre contas como aluguel, energia, internet e contador para entender melhor seu
+                  negócio.
+                </p>
+              ) : null}
             </div>
           ) : null}
         </section>
