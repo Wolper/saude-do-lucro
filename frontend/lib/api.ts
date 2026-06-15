@@ -58,6 +58,18 @@ export type FinancialEntryPayload = {
   source: string;
 };
 
+export type FinancialSummaryStatus = "positive" | "neutral" | "negative";
+
+export type FinancialSummary = {
+  total_revenue: number;
+  total_expense: number;
+  net_result: number;
+  status: FinancialSummaryStatus;
+  entries_count: number;
+  start_date: string | null;
+  end_date: string | null;
+};
+
 export class ApiError extends Error {
   status: number;
 
@@ -125,6 +137,14 @@ export function getCurrentUser(token: string) {
 
 export function getCurrentCompany(token: string) {
   return request<Company>("/companies/current", {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+}
+
+export function getFinancialSummary(token: string) {
+  return request<FinancialSummary>("/financial-summary", {
     headers: {
       Authorization: `Bearer ${token}`,
     },

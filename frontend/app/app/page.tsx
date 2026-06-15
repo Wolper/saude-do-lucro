@@ -6,17 +6,45 @@ import { useRouter } from "next/navigation";
 
 import {
   Company,
+  FinancialSummary,
   User,
   getCurrentCompany,
   getCurrentUser,
+  getFinancialSummary,
+  isUnauthorizedError,
   readToken,
   removeToken,
 } from "../../lib/api";
+
+const currencyFormatter = new Intl.NumberFormat("pt-BR", {
+  style: "currency",
+  currency: "BRL",
+});
+
+const summaryStatusContent = {
+  positive: {
+    text: "Seu período está positivo.",
+    className: "border-emerald-300/20 bg-emerald-300/10 text-emerald-100",
+  },
+  neutral: {
+    text: "Seu período está zerado.",
+    className: "border-sky-300/20 bg-sky-300/10 text-sky-100",
+  },
+  negative: {
+    text: "Seu período está negativo.",
+    className: "border-orange-300/20 bg-orange-300/10 text-orange-100",
+  },
+} satisfies Record<FinancialSummary["status"], { text: string; className: string }>;
+
+function formatCurrency(value: number) {
+  return currencyFormatter.format(value);
+}
 
 export default function AppPage() {
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
   const [company, setCompany] = useState<Company | null>(null);
+  const [summary, setSummary] = useState<FinancialSummary | null>(null);
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(true);
 
@@ -30,24 +58,31 @@ export default function AppPage() {
 
     const authToken = token;
 
-    async function loadAccount() {
+    async function loadInitialData() {
       try {
-        const [currentUser, currentCompany] = await Promise.all([
+        const [currentUser, currentCompany, currentSummary] = await Promise.all([
           getCurrentUser(authToken),
           getCurrentCompany(authToken),
+          getFinancialSummary(authToken),
         ]);
         setUser(currentUser);
         setCompany(currentCompany);
-      } catch {
-        removeToken();
-        setError("Sua sessão expirou. Entre novamente.");
-        router.replace("/login");
+        setSummary(currentSummary);
+      } catch (caughtError) {
+        if (isUnauthorizedError(caughtError)) {
+          removeToken();
+          setError("Sua sessão expirou. Entre novamente.");
+          router.replace("/login");
+          return;
+        }
+
+        setError("Não foi possível carregar seu resumo financeiro.");
       } finally {
         setIsLoading(false);
       }
     }
 
-    loadAccount();
+    loadInitialData();
   }, [router]);
 
   function handleLogout() {
@@ -58,10 +93,12 @@ export default function AppPage() {
   if (isLoading) {
     return (
       <main className="flex min-h-screen items-center justify-center bg-slate-950 px-4 text-white">
-        <p className="text-sm text-slate-300">Carregando sua conta...</p>
+        <p className="text-sm text-slate-300">Carregando seu resumo financeiro...</p>
       </main>
     );
   }
+
+  const statusContent = summary ? summaryStatusContent[summary.status] : null;
 
   return (
     <main className="min-h-screen bg-slate-950 px-4 py-8 text-white sm:px-6">
@@ -102,20 +139,63 @@ export default function AppPage() {
           </div>
         </section>
 
-        <section className="rounded-3xl border border-emerald-300/20 bg-emerald-300/10 p-6">
-          <p className="text-lg font-semibold text-emerald-50">
-            Base da conta criada. Próximo passo: cadastrar lançamentos financeiros.
-          </p>
-          <p className="mt-3 text-sm leading-6 text-emerald-100/80">
-            O dashboard financeiro ainda não foi implementado. Esta tela confirma apenas que sua
-            conta e empresa estão conectadas.
-          </p>
-          <Link
-            className="mt-5 inline-flex rounded-2xl bg-emerald-400 px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-emerald-300"
-            href="/app/entries"
-          >
-            Cadastrar receitas e despesas
-          </Link>
+        <section className="rounded-3xl border border-white/10 bg-white/[0.06] p-6">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+              <p className="text-sm font-semibold uppercase tracking-[0.2em] text-emerald-300">
+                Resumo financeiro
+              </p>
+              <h2 className="mt-2 text-2xl font-bold text-white">Visão simples do período</h2>
+            </div>
+            <Link
+              className="inline-flex rounded-2xl bg-emerald-400 px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-emerald-300"
+              href="/app/entries"
+            >
+              Cadastrar receitas e despesas
+            </Link>
+          </div>
+
+          {summary ? (
+            <div className="mt-6">
+              {summary.entries_count === 0 ? (
+                <p className="rounded-2xl border border-sky-300/20 bg-sky-300/10 p-4 text-sm leading-6 text-sky-100">
+                  Você ainda não tem lançamentos. Cadastre suas primeiras receitas e despesas para
+                  ver seu resumo.
+                </p>
+              ) : null}
+
+              <div className="mt-4 grid gap-4 sm:grid-cols-2">
+                <div className="rounded-2xl bg-slate-950/60 p-4">
+                  <p className="text-sm text-slate-400">Entradas</p>
+                  <p className="mt-2 text-2xl font-bold text-emerald-200">
+                    {formatCurrency(summary.total_revenue)}
+                  </p>
+                </div>
+                <div className="rounded-2xl bg-slate-950/60 p-4">
+                  <p className="text-sm text-slate-400">Saídas</p>
+                  <p className="mt-2 text-2xl font-bold text-orange-200">
+                    {formatCurrency(summary.total_expense)}
+                  </p>
+                </div>
+                <div className="rounded-2xl bg-slate-950/60 p-4">
+                  <p className="text-sm text-slate-400">Saldo</p>
+                  <p className="mt-2 text-2xl font-bold text-white">
+                    {formatCurrency(summary.net_result)}
+                  </p>
+                </div>
+                {statusContent ? (
+                  <div className={`rounded-2xl border p-4 ${statusContent.className}`}>
+                    <p className="text-sm opacity-80">Situação</p>
+                    <p className="mt-2 text-lg font-semibold">{statusContent.text}</p>
+                  </div>
+                ) : null}
+              </div>
+
+              <p className="mt-4 text-sm text-slate-300">
+                Lançamentos considerados: {summary.entries_count}
+              </p>
+            </div>
+          ) : null}
         </section>
       </section>
     </main>
