@@ -161,6 +161,43 @@ Filtros simples de listagem:
 
 Dashboard, cálculos de lucro, ponto de equilíbrio, relatórios e gráficos ainda não foram implementados.
 
+## API de resumo financeiro
+
+Endpoint protegido por `Authorization: Bearer <token>`:
+
+- `GET /financial-summary`: resume receitas, despesas, saldo e status do período para a empresa do usuário autenticado.
+
+Parâmetros opcionais de query string:
+
+- `start_date`: data inicial no formato `YYYY-MM-DD`;
+- `end_date`: data final no formato `YYYY-MM-DD`.
+
+Exemplos:
+
+```bash
+curl -H "Authorization: Bearer <token>" \
+  http://localhost:8000/financial-summary
+
+curl -H "Authorization: Bearer <token>" \
+  "http://localhost:8000/financial-summary?start_date=2026-06-01&end_date=2026-06-30"
+```
+
+Exemplo de resposta:
+
+```json
+{
+  "total_revenue": 2500.0,
+  "total_expense": 1800.0,
+  "net_result": 700.0,
+  "status": "positive",
+  "entries_count": 12,
+  "start_date": "2026-06-01",
+  "end_date": "2026-06-30"
+}
+```
+
+Dashboard, ponto de equilíbrio, margem por produto e IA ainda não foram implementados.
+
 ### Frontend
 
 Configure a URL pública da API usada pelo Next.js:
@@ -210,6 +247,7 @@ Dashboard financeiro, cálculos de lucro, ponto de equilíbrio, relatórios, gr�
 cd backend
 PYTHONPATH=. python -m pytest
 ```
+
 
 
 ### Frontend
