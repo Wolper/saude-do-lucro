@@ -1,11 +1,19 @@
 from fastapi import FastAPI
 
-from app.api.routes import auth, business_costs, companies, financial_entries, financial_summary
+from app.api.routes import (
+    auth,
+    business_cost_summary,
+    business_costs,
+    companies,
+    financial_entries,
+    financial_summary,
+)
 
 app = FastAPI(title="Saúde do Lucro API", version="0.1.0")
 app.include_router(auth.router)
 app.include_router(companies.router)
 app.include_router(business_costs.router)
+app.include_router(business_cost_summary.router)
 app.include_router(financial_entries.router)
 app.include_router(financial_summary.router)
 
