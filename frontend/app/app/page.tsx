@@ -147,12 +147,20 @@ export default function AppPage() {
               </p>
               <h2 className="mt-2 text-2xl font-bold text-white">Visão simples do período</h2>
             </div>
-            <Link
-              className="inline-flex rounded-2xl bg-emerald-400 px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-emerald-300"
-              href="/app/entries"
-            >
-              Cadastrar receitas e despesas
-            </Link>
+            <div className="flex flex-col gap-3 sm:items-end">
+              <Link
+                className="inline-flex rounded-2xl bg-emerald-400 px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-emerald-300"
+                href="/app/entries"
+              >
+                Cadastrar receitas e despesas
+              </Link>
+              <Link
+                className="inline-flex rounded-2xl border border-emerald-300/30 px-5 py-3 text-sm font-semibold text-emerald-100 transition hover:border-emerald-200 hover:bg-emerald-400/10"
+                href="/app/business-costs"
+              >
+                Cadastrar custos fixos
+              </Link>
+            </div>
           </div>
 
           {summary ? (
