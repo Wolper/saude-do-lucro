@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
@@ -109,6 +110,12 @@ export default function AppPage() {
             O dashboard financeiro ainda não foi implementado. Esta tela confirma apenas que sua
             conta e empresa estão conectadas.
           </p>
+          <Link
+            className="mt-5 inline-flex rounded-2xl bg-emerald-400 px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-emerald-300"
+            href="/app/entries"
+          >
+            Cadastrar receitas e despesas
+          </Link>
         </section>
       </section>
     </main>

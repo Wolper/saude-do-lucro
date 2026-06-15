@@ -32,6 +32,45 @@ export type Company = {
   segment: string;
 };
 
+export type FinancialEntryType = "revenue" | "expense";
+
+export type FinancialEntry = {
+  id: number;
+  company_id: number;
+  type: FinancialEntryType;
+  category: string;
+  description: string | null;
+  amount: number;
+  payment_method: string | null;
+  entry_date: string;
+  source: string;
+  created_at: string;
+  updated_at: string;
+};
+
+export type FinancialEntryPayload = {
+  type: FinancialEntryType;
+  category: string;
+  description?: string | null;
+  amount: number;
+  payment_method?: string | null;
+  entry_date: string;
+  source: string;
+};
+
+export class ApiError extends Error {
+  status: number;
+
+  constructor(status: number) {
+    super("Request failed");
+    this.status = status;
+  }
+}
+
+export function isUnauthorizedError(error: unknown) {
+  return error instanceof ApiError && error.status === 401;
+}
+
 async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
   const response = await fetch(`${API_URL}${path}`, {
     ...init,
@@ -42,10 +81,24 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
   });
 
   if (!response.ok) {
-    throw new Error("Request failed");
+    throw new ApiError(response.status);
   }
 
   return response.json() as Promise<T>;
+}
+
+async function requestWithoutBody(path: string, init: RequestInit = {}): Promise<void> {
+  const response = await fetch(`${API_URL}${path}`, {
+    ...init,
+    headers: {
+      "Content-Type": "application/json",
+      ...init.headers,
+    },
+  });
+
+  if (!response.ok) {
+    throw new ApiError(response.status);
+  }
 }
 
 export function register(payload: RegisterPayload) {
@@ -72,6 +125,35 @@ export function getCurrentUser(token: string) {
 
 export function getCurrentCompany(token: string) {
   return request<Company>("/companies/current", {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+}
+
+export function listFinancialEntries(token: string, type?: FinancialEntryType) {
+  const params = type ? `?type=${type}` : "";
+
+  return request<FinancialEntry[]>(`/financial-entries${params}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+}
+
+export function createFinancialEntry(token: string, payload: FinancialEntryPayload) {
+  return request<FinancialEntry>("/financial-entries", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(payload),
+  });
+}
+
+export function deleteFinancialEntry(token: string, entryId: number) {
+  return requestWithoutBody(`/financial-entries/${entryId}`, {
+    method: "DELETE",
     headers: {
       Authorization: `Bearer ${token}`,
     },
