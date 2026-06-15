@@ -198,6 +198,8 @@ Exemplo de resposta:
 
 Dashboard, ponto de equilíbrio, margem por produto e IA ainda não foram implementados.
 
+A tela autenticada `/app` exibe um resumo financeiro simples consumindo `/financial-summary`. Dashboard avançado, gráficos, ponto de equilíbrio, margem por produto e IA ainda não foram implementados.
+
 ### Frontend
 
 Configure a URL pública da API usada pelo Next.js:
