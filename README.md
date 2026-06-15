@@ -161,6 +161,45 @@ Filtros simples de listagem:
 
 Dashboard, cálculos de lucro, ponto de equilíbrio, relatórios e gráficos ainda não foram implementados.
 
+## API de custos fixos do negócio
+
+Endpoints protegidos por `Authorization: Bearer <token>`:
+
+- `POST /business-costs`: cria um custo fixo mensal para a empresa do usuário autenticado.
+- `GET /business-costs`: lista custos fixos somente da empresa autenticada.
+- `GET /business-costs/{cost_id}`: consulta um custo fixo da empresa autenticada.
+- `PUT /business-costs/{cost_id}`: atualiza um custo fixo da empresa autenticada.
+- `DELETE /business-costs/{cost_id}`: remove um custo fixo da empresa autenticada.
+
+Exemplo de criação:
+
+```bash
+curl -X POST http://localhost:8000/business-costs \
+  -H "Authorization: Bearer <token>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Aluguel",
+    "category": "aluguel",
+    "amount": 2500.00,
+    "is_active": true,
+    "notes": "Ponto comercial"
+  }'
+```
+
+Filtro simples de listagem:
+
+- `is_active`: `true` para custos ativos ou `false` para custos inativos.
+
+Exemplos:
+
+```bash
+curl -H "Authorization: Bearer <token>" http://localhost:8000/business-costs
+curl -H "Authorization: Bearer <token>" "http://localhost:8000/business-costs?is_active=true"
+curl -H "Authorization: Bearer <token>" "http://localhost:8000/business-costs?is_active=false"
+```
+
+Ponto de equilíbrio e necessidade mínima de faturamento ainda não foram implementados.
+
 ## API de resumo financeiro
 
 Endpoint protegido por `Authorization: Bearer <token>`:
