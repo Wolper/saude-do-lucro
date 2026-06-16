@@ -1,5 +1,6 @@
 "use client";
 
+// Source sanitized to avoid hidden or bidirectional Unicode control characters.
 import Link from "next/link";
 import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
