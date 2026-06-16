@@ -1,6 +1,6 @@
-# Saúde do Lucro
+# Saude do Lucro
 
-Fundação do projeto **Saúde do Lucro**, um copiloto de lucratividade para pequenos negócios de alimentação.
+Fundacao do projeto **Saude do Lucro**, um copiloto de lucratividade para pequenos negocios de alimentacao.
 
 ## Stack oficial
 
@@ -45,7 +45,7 @@ docker-compose.yml
 docker compose up -d postgres
 ```
 
-Configure a URL de conexão usada pelo backend e pelo Alembic e as variáveis de JWT:
+Configure a URL de conexao usada pelo backend e pelo Alembic e as variaveis de JWT:
 
 ```bash
 export DATABASE_URL="postgresql+psycopg://saude_user:saude_password@localhost:5432/saude_do_lucro"
@@ -90,14 +90,14 @@ Resposta esperada:
 ```
 
 
-## API de autenticação
+## API de autenticacao
 
-Endpoints disponíveis:
+Endpoints disponiveis:
 
-- `POST /auth/register`: cria um usuário com senha hasheada e uma empresa inicial vinculada.
+- `POST /auth/register`: cria um usuario com senha hasheada e uma empresa inicial vinculada.
 - `POST /auth/login`: autentica e retorna um token JWT Bearer.
-- `GET /auth/me`: retorna o usuário autenticado.
-- `GET /companies/current`: retorna a empresa atual do usuário autenticado.
+- `GET /auth/me`: retorna o usuario autenticado.
+- `GET /companies/current`: retorna a empresa atual do usuario autenticado.
 
 Exemplo de cadastro:
 
@@ -105,12 +105,12 @@ Exemplo de cadastro:
 curl -X POST http://localhost:8000/auth/register \
   -H "Content-Type: application/json" \
   -d '{
-    "name": "João",
+    "name": "Joao",
     "email": "joao@email.com",
     "password": "senha_segura",
     "company_name": "MM Chicken",
     "segment": "hamburgueria",
-    "city": "São Paulo",
+    "city": "Sao Paulo",
     "state": "SP"
   }'
 ```
@@ -126,17 +126,17 @@ curl -X POST http://localhost:8000/auth/login \
 Use o `access_token` retornado no header `Authorization: Bearer <token>` para consultar `/auth/me` e `/companies/current`.
 
 
-## API de lançamentos financeiros
+## API de lancamentos financeiros
 
 Endpoints protegidos por `Authorization: Bearer <token>`:
 
-- `POST /financial-entries`: cria um lançamento financeiro para a empresa do usuário autenticado.
-- `GET /financial-entries`: lista lançamentos somente da empresa autenticada.
-- `GET /financial-entries/{entry_id}`: consulta um lançamento da empresa autenticada.
-- `PUT /financial-entries/{entry_id}`: atualiza um lançamento da empresa autenticada.
-- `DELETE /financial-entries/{entry_id}`: remove um lançamento da empresa autenticada.
+- `POST /financial-entries`: cria um lancamento financeiro para a empresa do usuario autenticado.
+- `GET /financial-entries`: lista lancamentos somente da empresa autenticada.
+- `GET /financial-entries/{entry_id}`: consulta um lancamento da empresa autenticada.
+- `PUT /financial-entries/{entry_id}`: atualiza um lancamento da empresa autenticada.
+- `DELETE /financial-entries/{entry_id}`: remove um lancamento da empresa autenticada.
 
-Exemplo de criação:
+Exemplo de criacao:
 
 ```bash
 curl -X POST http://localhost:8000/financial-entries \
@@ -144,7 +144,7 @@ curl -X POST http://localhost:8000/financial-entries \
   -H "Content-Type: application/json" \
   -d '{
     "type": "revenue",
-    "category": "balcão",
+    "category": "balcao",
     "description": "Vendas do dia",
     "amount": 850.50,
     "payment_method": "pix",
@@ -159,19 +159,19 @@ Filtros simples de listagem:
 - `start_date`: data inicial no formato `YYYY-MM-DD`;
 - `end_date`: data final no formato `YYYY-MM-DD`.
 
-Dashboard, cálculos de lucro, ponto de equilíbrio, relatórios e gráficos ainda não foram implementados.
+Dashboard, calculos de lucro, ponto de equilibrio, relatorios e graficos ainda nao foram implementados.
 
-## API de custos fixos do negócio
+## API de custos fixos do negocio
 
 Endpoints protegidos por `Authorization: Bearer <token>`:
 
-- `POST /business-costs`: cria um custo fixo mensal para a empresa do usuário autenticado.
+- `POST /business-costs`: cria um custo fixo mensal para a empresa do usuario autenticado.
 - `GET /business-costs`: lista custos fixos somente da empresa autenticada.
 - `GET /business-costs/{cost_id}`: consulta um custo fixo da empresa autenticada.
 - `PUT /business-costs/{cost_id}`: atualiza um custo fixo da empresa autenticada.
 - `DELETE /business-costs/{cost_id}`: remove um custo fixo da empresa autenticada.
 
-Exemplo de criação:
+Exemplo de criacao:
 
 ```bash
 curl -X POST http://localhost:8000/business-costs \
@@ -198,11 +198,70 @@ curl -H "Authorization: Bearer <token>" "http://localhost:8000/business-costs?is
 curl -H "Authorization: Bearer <token>" "http://localhost:8000/business-costs?is_active=false"
 ```
 
+
+## API de produtos
+
+Endpoints protegidos por `Authorization: Bearer <token>`:
+
+- `POST /products`: cria um produto para a empresa do usuario autenticado.
+- `GET /products`: lista produtos somente da empresa autenticada.
+- `GET /products/unit-margin-ranking`: lista produtos ordenados pela maior margem unitaria.
+- `GET /products/{product_id}`: consulta um produto da empresa autenticada.
+- `PUT /products/{product_id}`: atualiza um produto da empresa autenticada.
+- `DELETE /products/{product_id}`: remove um produto da empresa autenticada.
+
+Campos principais:
+
+- `name`: nome do produto.
+- `category`: categoria do produto.
+- `selling_price`: preco de venda.
+- `estimated_unit_cost`: custo unitario estimado.
+- `is_active`: indica se o produto esta ativo.
+- `notes`: observacoes opcionais.
+
+A resposta inclui `unit_margin`, `margin_percent` e `pricing_status`.
+O `pricing_status` pode ser `profitable`, `break_even` ou `loss`.
+
+Filtros de listagem:
+
+- `is_active`: `true` para ativos ou `false` para inativos.
+- `category`: categoria exata do produto.
+
+Ranking de margem unitaria:
+
+- `GET /products/unit-margin-ranking` usa `is_active=true` por padrao.
+- `limit` usa padrao 10 e maximo 50.
+- `category` tambem pode ser usado no ranking.
+
+Exemplo de criacao:
+
+```bash
+curl -X POST http://localhost:8000/products \
+  -H "Authorization: Bearer <token>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "X Burger",
+    "category": "hamburguer",
+    "selling_price": 30.00,
+    "estimated_unit_cost": 12.50,
+    "is_active": true,
+    "notes": "Produto principal"
+  }'
+```
+
+Exemplos:
+
+```bash
+curl -H "Authorization: Bearer <token>" http://localhost:8000/products
+curl -H "Authorization: Bearer <token>" "http://localhost:8000/products?is_active=true&category=hamburguer"
+curl -H "Authorization: Bearer <token>" "http://localhost:8000/products/unit-margin-ranking?limit=10"
+```
+
 ## API de resumo de custos fixos
 
 Endpoint protegido por `Authorization: Bearer <token>`:
 
-- `GET /business-cost-summary`: resume os custos fixos mensais cadastrados para a empresa do usuário autenticado.
+- `GET /business-cost-summary`: resume os custos fixos mensais cadastrados para a empresa do usuario autenticado.
 
 Exemplo:
 
@@ -223,15 +282,15 @@ Exemplo de resposta:
 }
 ```
 
-Custos inativos não entram em `total_active_monthly_costs`.
+Custos inativos nao entram em `total_active_monthly_costs`.
 
-## API de ponto de equilíbrio simplificado
+## API de ponto de equilibrio simplificado
 
 Endpoint protegido por `Authorization: Bearer <token>`:
 
 - `GET /break-even-summary`: resume a cobertura dos custos fixos ativos pela receita da empresa autenticada.
 
-Parâmetros opcionais de query string:
+Parametros opcionais de query string:
 
 - `start_date`: data inicial no formato `YYYY-MM-DD`;
 - `end_date`: data final no formato `YYYY-MM-DD`.
@@ -258,19 +317,19 @@ Exemplo de resposta:
   "start_date": "2026-06-01",
   "end_date": "2026-06-30",
   "method": "fixed_cost_coverage",
-  "note": "Cálculo simplificado: considera apenas custos fixos ativos e receitas do período. Não considera margem por produto, custos variáveis ou CMV."
+  "note": "Calculo simplificado: considera apenas custos fixos ativos e receitas do periodo. Nao considera margem por produto, custos variaveis ou CMV."
 }
 ```
 
-Este é um cálculo simplificado de cobertura de custos fixos: a receita necessária para cobrir custos fixos é igual à soma dos custos fixos ativos mensais. Margem por produto, CMV, custos variáveis e IA ainda não foram implementados.
+Este e um calculo simplificado de cobertura de custos fixos: a receita necessaria para cobrir custos fixos e igual a soma dos custos fixos ativos mensais. Margem por produto, CMV, custos variaveis e IA ainda nao foram implementados.
 
 ## API de resumo financeiro
 
 Endpoint protegido por `Authorization: Bearer <token>`:
 
-- `GET /financial-summary`: resume receitas, despesas, saldo e status do período para a empresa do usuário autenticado.
+- `GET /financial-summary`: resume receitas, despesas, saldo e status do periodo para a empresa do usuario autenticado.
 
-Parâmetros opcionais de query string:
+Parametros opcionais de query string:
 
 - `start_date`: data inicial no formato `YYYY-MM-DD`;
 - `end_date`: data final no formato `YYYY-MM-DD`.
@@ -299,25 +358,25 @@ Exemplo de resposta:
 }
 ```
 
-Dashboard, gráficos, margem por produto e IA ainda não foram implementados.
+Dashboard, graficos, margem por produto e IA ainda nao foram implementados.
 
-A tela autenticada `/app` exibe um resumo financeiro simples consumindo `/financial-summary`, um resumo simples de custos fixos consumindo `/business-cost-summary` e um ponto de equilíbrio simplificado consumindo `/break-even-summary`. Esse cálculo ainda considera apenas custos fixos ativos e receitas registradas; gráficos, margem por produto, CMV, custos variáveis e IA ainda não foram implementados.
+A tela autenticada `/app` exibe um resumo financeiro simples consumindo `/financial-summary`, um resumo simples de custos fixos consumindo `/business-cost-summary` e um ponto de equilibrio simplificado consumindo `/break-even-summary`. Esse calculo ainda considera apenas custos fixos ativos e receitas registradas; graficos, margem por produto, CMV, custos variaveis e IA ainda nao foram implementados.
 
 ### Frontend
 
-Configure a URL pública da API usada pelo Next.js:
+Configure a URL publica da API usada pelo Next.js:
 
 ```bash
 export NEXT_PUBLIC_API_URL="http://localhost:8000"
 ```
 
-Também é possível usar o valor de referência do `.env.example`:
+Tambem e possivel usar o valor de referencia do `.env.example`:
 
 ```env
 NEXT_PUBLIC_API_URL=http://localhost:8000
 ```
 
-Para rodar a aplicação:
+Para rodar a aplicacao:
 
 ```bash
 cd frontend
@@ -325,24 +384,24 @@ npm install
 npm run dev
 ```
 
-A página inicial fica disponível em `http://localhost:3000`.
+A pagina inicial fica disponivel em `http://localhost:3000`.
 
-Fluxo manual de autenticação:
+Fluxo manual de autenticacao:
 
-1. Acesse `http://localhost:3000/register`, preencha os dados do usuário e da empresa e confirme o redirecionamento para `/app`.
-2. Use o botão **Sair** para remover o token local.
+1. Acesse `http://localhost:3000/register`, preencha os dados do usuario e da empresa e confirme o redirecionamento para `/app`.
+2. Use o botao **Sair** para remover o token local.
 3. Acesse `http://localhost:3000/login`, entre com o e-mail e senha cadastrados e confirme o retorno para `/app`.
 
 A tela `/app` mostra a base da conta criada e tem um link para `/app/entries`.
 
-Fluxo manual de lançamentos financeiros:
+Fluxo manual de lancamentos financeiros:
 
-1. Acesse `/app/entries` com uma sessão ativa.
+1. Acesse `/app/entries` com uma sessao ativa.
 2. Cadastre uma receita ou despesa informando tipo, categoria, valor, forma de pagamento e data.
-3. Use o filtro **Todos**, **Receitas** ou **Despesas** para listar lançamentos por tipo.
-4. Use **Excluir** em um card para remover um lançamento.
+3. Use o filtro **Todos**, **Receitas** ou **Despesas** para listar lancamentos por tipo.
+4. Use **Excluir** em um card para remover um lancamento.
 
-Dashboard financeiro, cálculos de lucro, ponto de equilíbrio, relatórios, gráficos e IA ainda não foram implementados.
+Dashboard financeiro, calculos de lucro, ponto de equilibrio, relatorios, graficos e IA ainda nao foram implementados.
 
 ## Testes
 
@@ -364,18 +423,18 @@ npm run build
 
 ## Diretrizes do projeto
 
-As diretrizes longas de produto, arquitetura e escopo estão em [`docs/project-guidelines.md`](docs/project-guidelines.md).
+As diretrizes longas de produto, arquitetura e escopo estao em [`docs/project-guidelines.md`](docs/project-guidelines.md).
 
 ## Tela de custos fixos
 
-A área autenticada inclui a rota `/app/business-costs` para cadastrar e acompanhar custos fixos mensais do negócio.
+A area autenticada inclui a rota `/app/business-costs` para cadastrar e acompanhar custos fixos mensais do negocio.
 
 Fluxo manual sugerido:
 
-1. Entrar na aplicação e acessar `/app/business-costs` pelo botão “Cadastrar custos fixos” na área inicial.
-2. Criar um custo fixo informando nome, categoria, valor mensal, status ativo e observações opcionais.
+1. Entrar na aplicacao e acessar `/app/business-costs` pelo botao Cadastrar custos fixos na area inicial.
+2. Criar um custo fixo informando nome, categoria, valor mensal, status ativo e observacoes opcionais.
 3. Conferir a listagem em cards e alternar os filtros Todos, Ativos e Inativos.
-4. Usar o botão Ativar/Desativar para mudar o status de um custo.
-5. Usar o botão Excluir e confirmar a remoção quando necessário.
+4. Usar o botao Ativar/Desativar para mudar o status de um custo.
+5. Usar o botao Excluir e confirmar a remocao quando necessario.
 
-Ponto de equilíbrio ainda não foi implementado nesta tela.
+Ponto de equilibrio ainda nao foi implementado nesta tela.
