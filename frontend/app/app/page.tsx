@@ -4,6 +4,8 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
+import { AppNav } from "../../components/AppNav";
+
 import {
   BreakEvenSummary,
   BusinessCostSummary,
@@ -164,11 +166,6 @@ export default function AppPage() {
     loadInitialData();
   }, [router]);
 
-  function handleLogout() {
-    removeToken();
-    router.push("/login");
-  }
-
   if (isLoading) {
     return (
       <main className="flex min-h-screen items-center justify-center bg-slate-950 px-4 text-white">
@@ -182,39 +179,50 @@ export default function AppPage() {
   return (
     <main className="min-h-screen bg-slate-950 px-4 py-8 text-white sm:px-6">
       <section className="mx-auto flex w-full max-w-3xl flex-col gap-6">
-        <header className="flex flex-col gap-4 rounded-3xl border border-white/10 bg-white/[0.06] p-6 shadow-2xl shadow-emerald-950/25 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <p className="text-sm font-semibold uppercase tracking-[0.24em] text-emerald-300">
-              Saúde do Lucro
+        <header className="rounded-3xl border border-white/10 bg-white/[0.06] p-6 shadow-2xl shadow-emerald-950/25">
+          <p className="text-sm font-semibold uppercase tracking-[0.24em] text-emerald-300">
+            Saúde do Lucro
+          </p>
+          <div className="mt-5 flex flex-col gap-3">
+            <h1 className="text-3xl font-bold tracking-tight">Olá, {user?.name}</h1>
+            <p className="text-lg font-semibold text-emerald-100">
+              {company?.name} · {company?.segment}
             </p>
-            <h1 className="mt-3 text-3xl font-bold tracking-tight">Área inicial</h1>
+            <p className="max-w-2xl text-sm leading-6 text-slate-300">
+              Acompanhe os resumos simples do negócio e acesse rapidamente os cadastros principais.
+            </p>
           </div>
-          <button
-            className="rounded-2xl border border-white/10 px-5 py-3 text-sm font-semibold text-slate-100 transition hover:border-emerald-300 hover:text-emerald-200"
-            onClick={handleLogout}
-            type="button"
-          >
-            Sair
-          </button>
         </header>
+
+        <AppNav />
 
         {error ? (
           <p className="rounded-2xl bg-red-500/10 px-4 py-3 text-sm text-red-200">{error}</p>
         ) : null}
 
         <section className="rounded-3xl border border-white/10 bg-white/[0.06] p-6">
-          <p className="text-sm text-slate-300">Olá,</p>
-          <h2 className="mt-1 text-2xl font-bold text-white">{user?.name}</h2>
-
-          <div className="mt-6 grid gap-4 sm:grid-cols-2">
-            <div className="rounded-2xl bg-slate-950/60 p-4">
-              <p className="text-sm text-slate-400">Empresa</p>
-              <p className="mt-1 text-lg font-semibold text-emerald-100">{company?.name}</p>
-            </div>
-            <div className="rounded-2xl bg-slate-950/60 p-4">
-              <p className="text-sm text-slate-400">Segmento</p>
-              <p className="mt-1 text-lg font-semibold text-emerald-100">{company?.segment}</p>
-            </div>
+          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-emerald-300">
+            Ações rápidas
+          </p>
+          <div className="mt-5 grid gap-4 sm:grid-cols-2">
+            <Link
+              className="rounded-2xl border border-emerald-300/20 bg-emerald-400/10 p-5 transition hover:border-emerald-200 hover:bg-emerald-400/15"
+              href="/app/entries"
+            >
+              <h2 className="text-lg font-bold text-white">Cadastrar receitas e despesas</h2>
+              <p className="mt-2 text-sm leading-6 text-slate-300">
+                Registre vendas, contas pagas e despesas do dia.
+              </p>
+            </Link>
+            <Link
+              className="rounded-2xl border border-emerald-300/20 bg-slate-950/50 p-5 transition hover:border-emerald-200 hover:bg-emerald-400/10"
+              href="/app/business-costs"
+            >
+              <h2 className="text-lg font-bold text-white">Cadastrar custos fixos</h2>
+              <p className="mt-2 text-sm leading-6 text-slate-300">
+                Cadastre contas mensais como aluguel, energia e internet.
+              </p>
+            </Link>
           </div>
         </section>
 
@@ -225,20 +233,6 @@ export default function AppPage() {
                 Resumo financeiro
               </p>
               <h2 className="mt-2 text-2xl font-bold text-white">Visão simples do período</h2>
-            </div>
-            <div className="flex flex-col gap-3 sm:items-end">
-              <Link
-                className="inline-flex rounded-2xl bg-emerald-400 px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-emerald-300"
-                href="/app/entries"
-              >
-                Cadastrar receitas e despesas
-              </Link>
-              <Link
-                className="inline-flex rounded-2xl border border-emerald-300/30 px-5 py-3 text-sm font-semibold text-emerald-100 transition hover:border-emerald-200 hover:bg-emerald-400/10"
-                href="/app/business-costs"
-              >
-                Cadastrar custos fixos
-              </Link>
             </div>
           </div>
 
@@ -285,72 +279,6 @@ export default function AppPage() {
           ) : null}
         </section>
 
-
-        <section className="rounded-3xl border border-white/10 bg-white/[0.06] p-6">
-          <div>
-            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-emerald-300">
-              Ponto de equilíbrio simplificado
-            </p>
-            <h2 className="mt-2 text-2xl font-bold text-white">Receitas cobrindo custos fixos</h2>
-          </div>
-
-          {breakEvenError ? (
-            <p className="mt-6 rounded-2xl bg-red-500/10 px-4 py-3 text-sm text-red-200">
-              {breakEvenError}
-            </p>
-          ) : null}
-
-          {breakEvenSummary ? (
-            <div className="mt-6">
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div className="rounded-2xl bg-slate-950/60 p-4">
-                  <p className="text-sm text-slate-400">Custos fixos mensais</p>
-                  <p className="mt-2 text-2xl font-bold text-white">
-                    {formatCurrency(breakEvenSummary.monthly_fixed_costs)}
-                  </p>
-                </div>
-                <div className="rounded-2xl bg-slate-950/60 p-4">
-                  <p className="text-sm text-slate-400">Receita necessária</p>
-                  <p className="mt-2 text-2xl font-bold text-white">
-                    {formatCurrency(breakEvenSummary.break_even_revenue)}
-                  </p>
-                </div>
-                <div className="rounded-2xl bg-slate-950/60 p-4">
-                  <p className="text-sm text-slate-400">Receita registrada</p>
-                  <p className="mt-2 text-2xl font-bold text-emerald-200">
-                    {formatCurrency(breakEvenSummary.period_revenue)}
-                  </p>
-                </div>
-                <div className="rounded-2xl bg-slate-950/60 p-4">
-                  <p className="text-sm text-slate-400">Falta para cobrir</p>
-                  <p className="mt-2 text-2xl font-bold text-orange-100">
-                    {formatCurrency(breakEvenSummary.revenue_gap)}
-                  </p>
-                </div>
-                <div className="rounded-2xl bg-slate-950/60 p-4">
-                  <p className="text-sm text-slate-400">Cobertura</p>
-                  <p className="mt-2 text-lg font-semibold text-slate-100">
-                    {formatPercent(breakEvenSummary.coverage_percent)}
-                  </p>
-                </div>
-                <div
-                  className={`rounded-2xl border p-4 ${
-                    breakEvenStatusContent[breakEvenSummary.status].className
-                  }`}
-                >
-                  <p className="text-sm opacity-80">Situação</p>
-                  <p className="mt-2 text-lg font-semibold">
-                    {breakEvenStatusContent[breakEvenSummary.status].text}
-                  </p>
-                </div>
-              </div>
-
-              <p className="mt-4 rounded-2xl border border-white/10 bg-slate-950/40 p-4 text-sm leading-6 text-slate-300">
-                {breakEvenSummary.note || fallbackBreakEvenNote}
-              </p>
-            </div>
-          ) : null}
-        </section>
 
         <section className="rounded-3xl border border-white/10 bg-white/[0.06] p-6">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
@@ -418,6 +346,73 @@ export default function AppPage() {
             </div>
           ) : null}
         </section>
+
+        <section className="rounded-3xl border border-white/10 bg-white/[0.06] p-6">
+          <div>
+            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-emerald-300">
+              Ponto de equilíbrio simplificado
+            </p>
+            <h2 className="mt-2 text-2xl font-bold text-white">Receitas cobrindo custos fixos</h2>
+          </div>
+
+          {breakEvenError ? (
+            <p className="mt-6 rounded-2xl bg-red-500/10 px-4 py-3 text-sm text-red-200">
+              {breakEvenError}
+            </p>
+          ) : null}
+
+          {breakEvenSummary ? (
+            <div className="mt-6">
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="rounded-2xl bg-slate-950/60 p-4">
+                  <p className="text-sm text-slate-400">Custos fixos mensais</p>
+                  <p className="mt-2 text-2xl font-bold text-white">
+                    {formatCurrency(breakEvenSummary.monthly_fixed_costs)}
+                  </p>
+                </div>
+                <div className="rounded-2xl bg-slate-950/60 p-4">
+                  <p className="text-sm text-slate-400">Receita necessária</p>
+                  <p className="mt-2 text-2xl font-bold text-white">
+                    {formatCurrency(breakEvenSummary.break_even_revenue)}
+                  </p>
+                </div>
+                <div className="rounded-2xl bg-slate-950/60 p-4">
+                  <p className="text-sm text-slate-400">Receita registrada</p>
+                  <p className="mt-2 text-2xl font-bold text-emerald-200">
+                    {formatCurrency(breakEvenSummary.period_revenue)}
+                  </p>
+                </div>
+                <div className="rounded-2xl bg-slate-950/60 p-4">
+                  <p className="text-sm text-slate-400">Falta para cobrir</p>
+                  <p className="mt-2 text-2xl font-bold text-orange-100">
+                    {formatCurrency(breakEvenSummary.revenue_gap)}
+                  </p>
+                </div>
+                <div className="rounded-2xl bg-slate-950/60 p-4">
+                  <p className="text-sm text-slate-400">Cobertura</p>
+                  <p className="mt-2 text-lg font-semibold text-slate-100">
+                    {formatPercent(breakEvenSummary.coverage_percent)}
+                  </p>
+                </div>
+                <div
+                  className={`rounded-2xl border p-4 ${
+                    breakEvenStatusContent[breakEvenSummary.status].className
+                  }`}
+                >
+                  <p className="text-sm opacity-80">Situação</p>
+                  <p className="mt-2 text-lg font-semibold">
+                    {breakEvenStatusContent[breakEvenSummary.status].text}
+                  </p>
+                </div>
+              </div>
+
+              <p className="mt-4 rounded-2xl border border-white/10 bg-slate-950/40 p-4 text-sm leading-6 text-slate-300">
+                {breakEvenSummary.note || fallbackBreakEvenNote}
+              </p>
+            </div>
+          ) : null}
+        </section>
+
       </section>
     </main>
   );

@@ -1,8 +1,9 @@
 "use client";
 
-import Link from "next/link";
 import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+
+import { AppNav } from "../../../components/AppNav";
 
 import {
   FinancialEntry,
@@ -192,11 +193,10 @@ export default function EntriesPage() {
   return (
     <main className="min-h-screen bg-slate-950 px-4 py-6 text-white sm:px-6 sm:py-8">
       <section className="mx-auto flex w-full max-w-4xl flex-col gap-5">
+        <AppNav />
+
         <header className="rounded-3xl border border-white/10 bg-white/[0.06] p-5 shadow-2xl shadow-emerald-950/25 sm:p-6">
-          <Link className="text-sm font-semibold text-emerald-200 transition hover:text-emerald-100" href="/app">
-            ← Voltar para a área inicial
-          </Link>
-          <div className="mt-5 flex flex-col gap-2">
+          <div className="flex flex-col gap-2">
             <p className="text-sm font-semibold uppercase tracking-[0.24em] text-emerald-300">
               Lançamentos financeiros
             </p>
