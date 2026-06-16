@@ -21,61 +21,63 @@ import {
 } from "../../lib/api";
 
 const currencyFormatter = new Intl.NumberFormat("pt-BR", {
-  style: "currency",
   currency: "BRL",
+  style: "currency",
 });
 
-const summaryStatusContent = {
-  positive: {
-    text: "Seu período está positivo.",
-    className: "border-emerald-300/20 bg-emerald-300/10 text-emerald-100",
+const percentFormatter = new Intl.NumberFormat("pt-BR", {
+  maximumFractionDigits: 2,
+  minimumFractionDigits: 0,
+});
+
+const financialStatusContent = {
+  negative: {
+    className: "border-orange-300/20 bg-orange-300/10 text-orange-100",
+    text: "Seu período está negativo.",
   },
   neutral: {
-    text: "Seu período está zerado.",
     className: "border-sky-300/20 bg-sky-300/10 text-sky-100",
+    text: "Seu período está zerado.",
   },
-  negative: {
-    text: "Seu período está negativo.",
-    className: "border-orange-300/20 bg-orange-300/10 text-orange-100",
+  positive: {
+    className: "border-emerald-300/20 bg-emerald-300/10 text-emerald-100",
+    text: "Seu período está positivo.",
   },
-} satisfies Record<FinancialSummary["status"], { text: string; className: string }>;
+} satisfies Record<FinancialSummary["status"], { className: string; text: string }>;
 
 const breakEvenStatusContent = {
-  not_configured: {
-    text: "Cadastre seus custos fixos para calcular este resumo.",
-    className: "border-sky-300/20 bg-sky-300/10 text-sky-100",
-  },
   below_break_even: {
-    text: "Você ainda não cobriu seus custos fixos.",
     className: "border-orange-300/20 bg-orange-300/10 text-orange-100",
+    text: "Você ainda não cobriu seus custos fixos.",
   },
   break_even_reached: {
-    text: "Você já cobriu seus custos fixos.",
     className: "border-emerald-300/20 bg-emerald-300/10 text-emerald-100",
+    text: "Você já cobriu seus custos fixos.",
   },
-} satisfies Record<BreakEvenSummary["status"], { text: string; className: string }>;
-
-const fallbackBreakEvenNote =
-  "Este é um cálculo simplificado. Ele considera apenas custos fixos ativos e receitas registradas. Ainda não considera margem por produto, custos variáveis ou CMV.";
+  not_configured: {
+    className: "border-sky-300/20 bg-sky-300/10 text-sky-100",
+    text: "Cadastre seus custos fixos para calcular este resumo.",
+  },
+} satisfies Record<BreakEvenSummary["status"], { className: string; text: string }>;
 
 const businessCostStatusText = {
   configured: "Seus custos fixos ativos já foram cadastrados.",
   empty: "Você ainda não cadastrou custos fixos ativos.",
 } satisfies Record<BusinessCostSummary["status"], string>;
 
+const defaultBreakEvenNote =
+  "Este é um cálculo simplificado. Ele considera apenas custos fixos ativos e receitas registradas. Ainda não considera margem por produto, custos variáveis ou CMV.";
+
 function formatCurrency(value: number) {
   return currencyFormatter.format(value);
 }
 
-function formatPercent(value: number | null) {
+function formatCoverage(value: number | null) {
   if (value === null) {
     return "Cobertura ainda não calculada.";
   }
 
-  return `${new Intl.NumberFormat("pt-BR", {
-    maximumFractionDigits: 2,
-    minimumFractionDigits: 0,
-  }).format(value)}% dos custos fixos cobertos.`;
+  return `${percentFormatter.format(value)}% dos custos fixos cobertos.`;
 }
 
 export default function AppPage() {
@@ -100,15 +102,9 @@ export default function AppPage() {
 
     const authToken = token;
 
-    async function loadInitialData() {
+    async function loadDashboard() {
       try {
-        const [
-          currentUser,
-          currentCompany,
-          currentSummary,
-          currentBusinessCostSummary,
-          currentBreakEvenSummary,
-        ] = await Promise.allSettled([
+        const results = await Promise.allSettled([
           getCurrentUser(authToken),
           getCurrentCompany(authToken),
           getFinancialSummary(authToken),
@@ -116,43 +112,41 @@ export default function AppPage() {
           getBreakEvenSummary(authToken),
         ]);
 
-        const expiredSession = [
-          currentUser,
-          currentCompany,
-          currentSummary,
-          currentBusinessCostSummary,
-          currentBreakEvenSummary,
-        ].some((result) => result.status === "rejected" && isUnauthorizedError(result.reason));
+        const [userResult, companyResult, summaryResult, businessCostResult, breakEvenResult] =
+          results;
+        const hasExpiredSession = results.some(
+          (result) => result.status === "rejected" && isUnauthorizedError(result.reason),
+        );
 
-        if (expiredSession) {
+        if (hasExpiredSession) {
           removeToken();
           setError("Sua sessão expirou. Entre novamente.");
           router.replace("/login");
           return;
         }
 
-        if (currentUser.status === "fulfilled") {
-          setUser(currentUser.value);
+        if (userResult.status === "fulfilled") {
+          setUser(userResult.value);
         }
 
-        if (currentCompany.status === "fulfilled") {
-          setCompany(currentCompany.value);
+        if (companyResult.status === "fulfilled") {
+          setCompany(companyResult.value);
         }
 
-        if (currentSummary.status === "fulfilled") {
-          setSummary(currentSummary.value);
+        if (summaryResult.status === "fulfilled") {
+          setSummary(summaryResult.value);
         } else {
           setError("Não foi possível carregar seu resumo financeiro.");
         }
 
-        if (currentBusinessCostSummary.status === "fulfilled") {
-          setBusinessCostSummary(currentBusinessCostSummary.value);
+        if (businessCostResult.status === "fulfilled") {
+          setBusinessCostSummary(businessCostResult.value);
         } else {
           setBusinessCostError("Não foi possível carregar seus custos fixos.");
         }
 
-        if (currentBreakEvenSummary.status === "fulfilled") {
-          setBreakEvenSummary(currentBreakEvenSummary.value);
+        if (breakEvenResult.status === "fulfilled") {
+          setBreakEvenSummary(breakEvenResult.value);
         } else {
           setBreakEvenError("Não foi possível carregar o ponto de equilíbrio.");
         }
@@ -161,7 +155,7 @@ export default function AppPage() {
       }
     }
 
-    loadInitialData();
+    loadDashboard();
   }, [router]);
 
   function handleLogout() {
@@ -177,25 +171,30 @@ export default function AppPage() {
     );
   }
 
-  const statusContent = summary ? summaryStatusContent[summary.status] : null;
+  const financialStatus = summary ? financialStatusContent[summary.status] : null;
 
   return (
     <main className="min-h-screen bg-slate-950 px-4 py-8 text-white sm:px-6">
       <section className="mx-auto flex w-full max-w-3xl flex-col gap-6">
-        <header className="flex flex-col gap-4 rounded-3xl border border-white/10 bg-white/[0.06] p-6 shadow-2xl shadow-emerald-950/25 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <p className="text-sm font-semibold uppercase tracking-[0.24em] text-emerald-300">
-              Saúde do Lucro
-            </p>
-            <h1 className="mt-3 text-3xl font-bold tracking-tight">Área inicial</h1>
+        <header className="rounded-3xl border border-white/10 bg-white/[0.06] p-6 shadow-2xl shadow-emerald-950/25">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p className="text-sm font-semibold uppercase tracking-[0.24em] text-emerald-300">
+                Saúde do Lucro
+              </p>
+              <h1 className="mt-3 text-3xl font-bold tracking-tight">Área inicial</h1>
+              <p className="mt-2 text-sm leading-6 text-slate-300">
+                Acompanhe os principais números da sua empresa em uma visão simples.
+              </p>
+            </div>
+            <button
+              className="rounded-2xl border border-white/10 px-5 py-3 text-sm font-semibold text-slate-100 transition hover:border-emerald-300 hover:text-emerald-200"
+              onClick={handleLogout}
+              type="button"
+            >
+              Sair
+            </button>
           </div>
-          <button
-            className="rounded-2xl border border-white/10 px-5 py-3 text-sm font-semibold text-slate-100 transition hover:border-emerald-300 hover:text-emerald-200"
-            onClick={handleLogout}
-            type="button"
-          >
-            Sair
-          </button>
         </header>
 
         {error ? (
@@ -270,10 +269,10 @@ export default function AppPage() {
                     {formatCurrency(summary.net_result)}
                   </p>
                 </div>
-                {statusContent ? (
-                  <div className={`rounded-2xl border p-4 ${statusContent.className}`}>
+                {financialStatus ? (
+                  <div className={`rounded-2xl border p-4 ${financialStatus.className}`}>
                     <p className="text-sm opacity-80">Situação</p>
-                    <p className="mt-2 text-lg font-semibold">{statusContent.text}</p>
+                    <p className="mt-2 text-lg font-semibold">{financialStatus.text}</p>
                   </div>
                 ) : null}
               </div>
@@ -284,7 +283,6 @@ export default function AppPage() {
             </div>
           ) : null}
         </section>
-
 
         <section className="rounded-3xl border border-white/10 bg-white/[0.06] p-6">
           <div>
@@ -330,7 +328,7 @@ export default function AppPage() {
                 <div className="rounded-2xl bg-slate-950/60 p-4">
                   <p className="text-sm text-slate-400">Cobertura</p>
                   <p className="mt-2 text-lg font-semibold text-slate-100">
-                    {formatPercent(breakEvenSummary.coverage_percent)}
+                    {formatCoverage(breakEvenSummary.coverage_percent)}
                   </p>
                 </div>
                 <div
@@ -346,7 +344,7 @@ export default function AppPage() {
               </div>
 
               <p className="mt-4 rounded-2xl border border-white/10 bg-slate-950/40 p-4 text-sm leading-6 text-slate-300">
-                {breakEvenSummary.note || fallbackBreakEvenNote}
+                {breakEvenSummary.note || defaultBreakEvenNote}
               </p>
             </div>
           ) : null}
