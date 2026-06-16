@@ -182,32 +182,33 @@ export default function AppPage() {
   return (
     <main className="min-h-screen bg-slate-950 px-4 py-8 text-white sm:px-6">
       <section className="mx-auto flex w-full max-w-3xl flex-col gap-6">
-        <header className="flex flex-col gap-4 rounded-3xl border border-white/10 bg-white/[0.06] p-6 shadow-2xl shadow-emerald-950/25 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <p className="text-sm font-semibold uppercase tracking-[0.24em] text-emerald-300">
-              Saúde do Lucro
-            </p>
-            <h1 className="mt-3 text-3xl font-bold tracking-tight">Área inicial</h1>
+        <header className="rounded-3xl border border-white/10 bg-white/[0.06] p-6 shadow-2xl shadow-emerald-950/25">
+          <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
+            <div>
+              <p className="text-sm font-semibold uppercase tracking-[0.24em] text-emerald-300">
+                Saúde do Lucro
+              </p>
+              <h1 className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">Área inicial</h1>
+              <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-300">
+                Acompanhe o essencial do seu negócio e acesse rapidamente os cadastros do período.
+              </p>
+            </div>
+
+            <button
+              className="w-full rounded-2xl border border-white/10 px-5 py-3 text-sm font-semibold text-slate-100 transition hover:border-emerald-300 hover:text-emerald-200 sm:w-auto"
+              onClick={handleLogout}
+              type="button"
+            >
+              Sair
+            </button>
           </div>
-          <button
-            className="rounded-2xl border border-white/10 px-5 py-3 text-sm font-semibold text-slate-100 transition hover:border-emerald-300 hover:text-emerald-200"
-            onClick={handleLogout}
-            type="button"
-          >
-            Sair
-          </button>
-        </header>
 
-        {error ? (
-          <p className="rounded-2xl bg-red-500/10 px-4 py-3 text-sm text-red-200">{error}</p>
-        ) : null}
-
-        <section className="rounded-3xl border border-white/10 bg-white/[0.06] p-6">
-          <p className="text-sm text-slate-300">Olá,</p>
-          <h2 className="mt-1 text-2xl font-bold text-white">{user?.name}</h2>
-
-          <div className="mt-6 grid gap-4 sm:grid-cols-2">
-            <div className="rounded-2xl bg-slate-950/60 p-4">
+          <div className="mt-6 grid gap-4 md:grid-cols-3">
+            <div className="rounded-2xl bg-slate-950/60 p-4 md:col-span-3">
+              <p className="text-sm text-slate-400">Usuário</p>
+              <p className="mt-1 text-xl font-semibold text-white">{user?.name}</p>
+            </div>
+            <div className="rounded-2xl bg-slate-950/60 p-4 md:col-span-2">
               <p className="text-sm text-slate-400">Empresa</p>
               <p className="mt-1 text-lg font-semibold text-emerald-100">{company?.name}</p>
             </div>
@@ -216,7 +217,26 @@ export default function AppPage() {
               <p className="mt-1 text-lg font-semibold text-emerald-100">{company?.segment}</p>
             </div>
           </div>
-        </section>
+
+          <div className="mt-6 grid gap-3 sm:grid-cols-2">
+            <Link
+              className="inline-flex justify-center rounded-2xl bg-emerald-400 px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-emerald-300"
+              href="/app/entries"
+            >
+              Receitas e despesas
+            </Link>
+            <Link
+              className="inline-flex justify-center rounded-2xl border border-emerald-300/30 px-5 py-3 text-sm font-semibold text-emerald-100 transition hover:border-emerald-200 hover:bg-emerald-400/10"
+              href="/app/business-costs"
+            >
+              Custos fixos
+            </Link>
+          </div>
+        </header>
+
+        {error ? (
+          <p className="rounded-2xl bg-red-500/10 px-4 py-3 text-sm text-red-200">{error}</p>
+        ) : null}
 
         <section className="rounded-3xl border border-white/10 bg-white/[0.06] p-6">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
