@@ -8,6 +8,7 @@ from app.api.routes import (
     companies,
     financial_entries,
     financial_summary,
+    products,
 )
 
 app = FastAPI(title="Saúde do Lucro API", version="0.1.0")
@@ -18,6 +19,7 @@ app.include_router(business_costs.router)
 app.include_router(business_cost_summary.router)
 app.include_router(financial_entries.router)
 app.include_router(financial_summary.router)
+app.include_router(products.router)
 
 
 @app.get("/health")

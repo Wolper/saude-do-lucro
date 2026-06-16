@@ -10,6 +10,7 @@ from app.models.user import User
 if TYPE_CHECKING:
     from app.models.business_cost import BusinessCost
     from app.models.financial_entry import FinancialEntry
+    from app.models.product import Product
 
 
 class Company(Base):
@@ -32,5 +33,8 @@ class Company(Base):
         back_populates="company", cascade="all, delete-orphan"
     )
     business_costs: Mapped[list["BusinessCost"]] = relationship(
+        back_populates="company", cascade="all, delete-orphan"
+    )
+    products: Mapped[list["Product"]] = relationship(
         back_populates="company", cascade="all, delete-orphan"
     )

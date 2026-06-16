@@ -198,6 +198,56 @@ curl -H "Authorization: Bearer <token>" "http://localhost:8000/business-costs?is
 curl -H "Authorization: Bearer <token>" "http://localhost:8000/business-costs?is_active=false"
 ```
 
+## API de produtos
+
+Endpoints protegidos por `Authorization: Bearer <token>`:
+
+- `POST /products`: cria um produto para a empresa do usuário autenticado.
+- `GET /products`: lista produtos somente da empresa autenticada.
+- `GET /products/unit-margin-ranking`: lista produtos ordenados pela maior margem unitária.
+- `GET /products/{product_id}`: consulta um produto da empresa autenticada.
+- `PUT /products/{product_id}`: atualiza um produto da empresa autenticada.
+- `DELETE /products/{product_id}`: remove um produto da empresa autenticada.
+
+Exemplo de criação:
+
+```bash
+curl -X POST http://localhost:8000/products \
+  -H "Authorization: Bearer <token>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "X-Burger",
+    "category": "hambúrguer",
+    "selling_price": 25.00,
+    "estimated_unit_cost": 11.50,
+    "is_active": true,
+    "notes": "Produto principal"
+  }'
+```
+
+Filtros simples de listagem:
+
+- `is_active`: `true` para produtos ativos ou `false` para produtos inativos;
+- `category`: categoria textual do produto, como `bebida`, `pizza`, `hambúrguer`, `acompanhamento`, `combo` ou `outros`.
+
+Exemplos:
+
+```bash
+curl -H "Authorization: Bearer <token>" http://localhost:8000/products
+curl -H "Authorization: Bearer <token>" "http://localhost:8000/products?is_active=true"
+curl -H "Authorization: Bearer <token>" "http://localhost:8000/products?category=bebida"
+curl -H "Authorization: Bearer <token>" "http://localhost:8000/products?is_active=true&category=hambúrguer"
+```
+
+Ranking de margem unitária:
+
+```bash
+curl -H "Authorization: Bearer <token>" \
+  "http://localhost:8000/products/unit-margin-ranking?limit=10"
+```
+
+A margem unitária é calculada como `preço de venda - custo estimado manual por unidade`. A margem percentual é calculada sobre o preço de venda e o status de preço retorna `profitable`, `break_even` ou `loss`. Ficha técnica, ingredientes, CMV avançado e IA ainda não foram implementados.
+
 ## API de resumo de custos fixos
 
 Endpoint protegido por `Authorization: Bearer <token>`:
@@ -299,7 +349,7 @@ Exemplo de resposta:
 }
 ```
 
-Dashboard, gráficos, margem por produto e IA ainda não foram implementados.
+Dashboard, gráficos, venda por produto e IA ainda não foram implementados.
 
 A tela autenticada `/app` exibe um resumo financeiro simples consumindo `/financial-summary`, um resumo simples de custos fixos consumindo `/business-cost-summary` e um ponto de equilíbrio simplificado consumindo `/break-even-summary`. Esse cálculo ainda considera apenas custos fixos ativos e receitas registradas; gráficos, margem por produto, CMV, custos variáveis e IA ainda não foram implementados.
 
